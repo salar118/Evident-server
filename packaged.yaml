@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'sam-app
+
+  Sample SAM Template for sam-app
+
+  '
+Globals:
+  Function:
+    Timeout: 3
+Outputs:
+  GetAllPersonsApi:
+    Description: API Gateway endpoint URL for Prod stage for getAllPersons function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/getAllPersons/
+  GetAllPersonsFunction:
+    Description: GetAllPersons Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - GetAllPersonsFunction
+      - Arn
+  GetAllPersonsFunctionIamRole:
+    Description: Implicit IAM Role created for GetAllPersons function
+    Value:
+      Fn::GetAtt:
+      - GetAllPersonsFunctionRole
+      - Arn
+Resources:
+  GetAllPersonsFunction:
+    Properties:
+      CodeUri: s3://evidence-repo/22b3cc8e3cdc60c118ae0fae895523fc
+      Events:
+        GetAllPersons:
+          Properties:
+            Method: get
+            Path: /getAllPersons
+          Type: Api
+      Handler: app.getAllPersons
+      Runtime: python3.7
+    Type: AWS::Serverless::Function
+Transform: AWS::Serverless-2016-10-31
