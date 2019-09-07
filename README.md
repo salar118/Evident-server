@@ -19,9 +19,9 @@ This is a sample template for sam-app - Below is a brief explanation of what we 
 
 ## Requirements
 
-* AWS CLI already configured with Administrator permission
-* [Python 3 installed](https://www.python.org/downloads/)
-* [Docker installed](https://www.docker.com/community-edition)
+- AWS CLI already configured with Administrator permission
+- [Python 3 installed](https://www.python.org/downloads/)
+- [Docker installed](https://www.docker.com/community-edition)
 
 ## Setup process
 
@@ -44,13 +44,13 @@ If the previous command ran successfully you should now be able to hit the follo
 **SAM CLI** is used to emulate both Lambda and API Gateway locally and uses our `template.yaml` to understand how to bootstrap this environment (runtime, where the source code is, etc.) - The following excerpt is what the CLI will read in order to initialize an API and its routes:
 
 ```yaml
-...
+---
 Events:
-    HelloWorld:
-        Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-        Properties:
-            Path: /hello
-            Method: get
+  HelloWorld:
+    Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+    Properties:
+      Path: /hello
+      Method: get
 ```
 
 ## Packaging and deployment
@@ -98,7 +98,7 @@ aws cloudformation describe-stacks \
     --stack-name sam-app \
     --query 'Stacks[].Outputs[?OutputKey==`HelloWorldApi`]' \
     --output table
-``` 
+```
 
 ## Fetch, tail, and filter Lambda function logs
 
@@ -113,7 +113,6 @@ sam logs -n HelloWorldFunction --stack-name sam-app --tail
 You can find more information and examples about filtering Lambda function logs in the [SAM CLI Documentation](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-logging.html).
 
 ## Testing
-
 
 Next, we install test dependencies and we run `pytest` against our `tests` folder to run our initial unit tests:
 
@@ -136,19 +135,19 @@ Here are a few things you can try to get more acquainted with building serverles
 
 ### Learn how SAM Build can help you with dependencies
 
-* Uncomment lines on `app.py`
-* Build the project with ``sam build --use-container``
-* Invoke with ``sam local invoke HelloWorldFunction --event event.json``
-* Update tests
+- Uncomment lines on `app.py`
+- Build the project with `sam build --use-container`
+- Invoke with `sam local invoke HelloWorldFunction --event event.json`
+- Update tests
 
 ### Create an additional API resource
 
-* Create a catch all resource (e.g. /hello/{proxy+}) and return the name requested through this new path
-* Update tests
+- Create a catch all resource (e.g. /hello/{proxy+}) and return the name requested through this new path
+- Update tests
 
 ### Step-through debugging
 
-* **[Enable step-through debugging docs for supported runtimes]((https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-using-debugging.html))**
+- **[Enable step-through debugging docs for supported runtimes](<(https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-using-debugging.html)>)**
 
 Next, you can use AWS Serverless Application Repository to deploy ready to use Apps that go beyond hello world samples and learn how authors developed their applications: [AWS Serverless Application Repository main page](https://aws.amazon.com/serverless/serverlessrepo/)
 
@@ -156,7 +155,7 @@ Next, you can use AWS Serverless Application Repository to deploy ready to use A
 
 ## Building the project
 
-[AWS Lambda requires a flat folder](https://docs.aws.amazon.com/lambda/latest/dg/lambda-python-how-to-create-deployment-package.html) with the application as well as its dependencies in  deployment package. When you make changes to your source code or dependency manifest,
+[AWS Lambda requires a flat folder](https://docs.aws.amazon.com/lambda/latest/dg/lambda-python-how-to-create-deployment-package.html) with the application as well as its dependencies in deployment package. When you make changes to your source code or dependency manifest,
 run the following command to build your project local testing and deployment:
 
 ```bash
@@ -164,6 +163,7 @@ sam build
 ```
 
 If your dependencies contain native modules that need to be compiled specifically for the operating system running on AWS Lambda, use this command to build inside a Lambda-like Docker container instead:
+
 ```bash
 sam build --use-container
 ```
@@ -188,23 +188,14 @@ sam local start-api
 aws s3 mb s3://BUCKET_NAME
 
 # Package Lambda function defined locally and upload to S3 as an artifact
-sam package \
-    --output-template-file packaged.yaml \
-    --s3-bucket REPLACE_THIS_WITH_YOUR_S3_BUCKET_NAME
+sam package --output-template-file packaged.yaml --s3-bucket evidence-repo
 
 # Deploy SAM template as a CloudFormation stack
-sam deploy \
-    --template-file packaged.yaml \
-    --stack-name sam-app \
-    --capabilities CAPABILITY_IAM
+sam deploy --template-file packaged.yaml --stack-name evidence-app --capabilities CAPABILITY_IAM
 
 # Describe Output section of CloudFormation stack previously created
-aws cloudformation describe-stacks \
-    --stack-name sam-app \
-    --query 'Stacks[].Outputs[?OutputKey==`HelloWorldApi`]' \
-    --output table
+aws cloudformation describe-stacks --stack-name evidence-app --query 'Stacks[].Outputs[?OutputKey==`EvidenceApi`]' --output table
 
 # Tail Lambda function Logs using Logical name defined in SAM Template
-sam logs -n HelloWorldFunction --stack-name sam-app --tail
+sam logs -n GetAllPersonsFunction --stack-name sam-app --tail
 ```
-

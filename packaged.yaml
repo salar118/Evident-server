@@ -1,4 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
 Description: 'sam-app
 
   Sample SAM Template for sam-app
@@ -7,6 +8,58 @@ Description: 'sam-app
 Globals:
   Function:
     Timeout: 3
+  Api:
+    Cors:
+      AllowMethods: '''OPTIONS,POST,GET'''
+      AllowHeaders: '''Content-Type'''
+      AllowOrigin: '''*'''
+Parameters:
+  EvidentTableName:
+    Type: String
+    Default: Evident
+    Description: (Required) The name of the new DynamoDB table you want to create
+      and save to. Minimum 3 characters
+    MinLength: 3
+    MaxLength: 50
+    AllowedPattern: ^[A-Za-z]+$
+    ConstraintDescription: Required parameter. Must be characters only. No numbers
+      allowed.
+Resources:
+  GetAllPersonsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://evidence-repo/e95e1e41c2be57aeccd0485194406755
+      Handler: person.getAllPersons
+      Runtime: python3.7
+      Events:
+        GetAllPersons:
+          Type: Api
+          Properties:
+            Path: /getAllPersons
+            Method: get
+      Environment:
+        Variables:
+          RESOURCE_TYPE: dynamodb
+          TABLE_NAME:
+            Ref: EvidentTableName
+          PRIMARY_KEY:
+            Fn::Sub: Id
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName:
+            Ref: EvidentTableName
+  GetPersonByIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://evidence-repo/e95e1e41c2be57aeccd0485194406755
+      Handler: person.getPersonById
+      Runtime: python3.7
+      Events:
+        GetAllPersons:
+          Type: Api
+          Properties:
+            Path: /getPersonById
+            Method: get
 Outputs:
   GetAllPersonsApi:
     Description: API Gateway endpoint URL for Prod stage for getAllPersons function
@@ -40,50 +93,3 @@ Outputs:
       Fn::GetAtt:
       - GetPersonByIdFunctionRole
       - Arn
-Parameters:
-  EvidentTableName:
-    AllowedPattern: ^[A-Za-z]+$
-    ConstraintDescription: Required parameter. Must be characters only. No numbers
-      allowed.
-    Default: Evident
-    Description: (Required) The name of the new DynamoDB table you want to create
-      and save to. Minimum 3 characters
-    MaxLength: 50
-    MinLength: 3
-    Type: String
-Resources:
-  GetAllPersonsFunction:
-    Properties:
-      CodeUri: s3://evidence-repo/0108f75e51161b9f5d17ed5dcf7f1389
-      Environment:
-        Variables:
-          PRIMARY_KEY:
-            Fn::Sub: Id
-          TABLE_NAME:
-            Ref: EvidentTableName
-      Events:
-        GetAllPersons:
-          Properties:
-            Method: get
-            Path: /getAllPersons
-          Type: Api
-      Handler: person.getAllPersons
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName:
-            Ref: EvidentTableName
-      Runtime: python3.7
-    Type: AWS::Serverless::Function
-  GetPersonByIdFunction:
-    Properties:
-      CodeUri: s3://evidence-repo/458876507c3f6c0a47d9b803793b08cf
-      Events:
-        GetAllPersons:
-          Properties:
-            Method: get
-            Path: /getPersonById
-          Type: Api
-      Handler: person.getPersonById
-      Runtime: python3.7
-    Type: AWS::Serverless::Function
-Transform: AWS::Serverless-2016-10-31

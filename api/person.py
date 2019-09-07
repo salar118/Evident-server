@@ -1,26 +1,26 @@
-import json
 import boto3
+import json
+import os
+
+from utilities.DecimalEncoder import DecimalEncoder
+
+TABLE_NAME = os.environ['TABLE_NAME']
+RESOURCE_TYPE = os.environ['RESOURCE_TYPE']
+
+dynamodb = boto3.resource(RESOURCE_TYPE)
+table = dynamodb.Table(TABLE_NAME)
 
 
 def getAllPersons(event, context):
-
-    dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('Evident')
-
-    table.put_item(
-        Item={
-            'id': 'kdk1',
-            'last_name': 'assswwb',
-            'name': 'salar'
-        }
-    )
-
+    response = table.scan()
     return {
         "statusCode": 200,
-        "body": json.dumps({
-            "message": "all the persons in evident",
-            # "location": ip.text.replace("\n", "")
-        }),
+        "headers": {
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Headers": "Content-Type",
+            "Access-Control-Allow-Methods": "GET"
+        },
+        "body":     json.dumps(response, indent=4, cls=DecimalEncoder)
     }
 
 

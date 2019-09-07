@@ -1,4 +1,4 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
 Description: >
   sam-app
@@ -9,16 +9,22 @@ Description: >
 Globals:
   Function:
     Timeout: 3
+  Api:
+    # Allows an application running locally on port 8080 to call this API
+    Cors:
+      AllowMethods: "'OPTIONS,POST,GET'"
+      AllowHeaders: "'Content-Type'"
+      AllowOrigin: "'*'"
 
 Parameters:
   EvidentTableName:
     Type: String
-    Default: 'Evident'
+    Default: "Evident"
     Description: (Required) The name of the new DynamoDB table you want to create and save to. Minimum 3 characters
     MinLength: 3
     MaxLength: 50
     AllowedPattern: ^[A-Za-z]+$
-    ConstraintDescription: 'Required parameter. Must be characters only. No numbers allowed.'    
+    ConstraintDescription: "Required parameter. Must be characters only. No numbers allowed."
 
 Resources:
   GetAllPersonsFunction:
@@ -35,11 +41,12 @@ Resources:
             Method: get
       Environment:
         Variables:
+          RESOURCE_TYPE: "dynamodb"
           TABLE_NAME: !Ref EvidentTableName
           PRIMARY_KEY: !Sub Id
       Policies:
         - DynamoDBCrudPolicy:
-            TableName: !Ref EvidentTableName      
+            TableName: !Ref EvidentTableName
   GetPersonByIdFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -51,7 +58,7 @@ Resources:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /getPersonById
-            Method: get            
+            Method: get
 
 Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
@@ -67,8 +74,8 @@ Outputs:
     Description: "Implicit IAM Role created for GetAllPersons function"
     Value: !GetAtt GetAllPersonsFunctionRole.Arn
   GetPersonByIdApi:
-      Description: "API Gateway endpoint URL for Prod stage for getPersonById function"
-      Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/getPersonById/"
+    Description: "API Gateway endpoint URL for Prod stage for getPersonById function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/getPersonById/"
   GetPersonByIdFunction:
     Description: "GetPersonById Lambda Function ARN"
     Value: !GetAtt GetPersonByIdFunction.Arn
